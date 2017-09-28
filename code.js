@@ -6,16 +6,26 @@ let projection = d3.geoMercator()
                     .fitSize([width, height], india)
 
 let path = d3.geoPath().projection(projection)
+let colorDomain = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4300]
 
-let color = ({ properties }) => d3.scaleLinear()
-                                .domain([0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4300])
-                                .range(d3.schemeYlOrRd[9])(properties.CASES)
+let color =  d3.scaleLinear()
+                .domain(colorDomain)
+                .range(d3.schemeYlOrRd[9])
+
+let active = d3.select(null)
 
 let { features: states } = india
 
+let heading = d3.select('body')
+    .append('h2')
+    .text('Rapes Reported in India 2015')
 
  d3.csv('india_crime.csv', (err, file) => {
     if (err) throw err
+
+    let zoom = d3.zoom()
+                .scaleExtent([1, 8])
+                .on('zoom', zoomed)
 
     for(i=0; i< states.length; i++){
         for(j=0; j< file.length; j++){
@@ -25,10 +35,6 @@ let { features: states } = india
             }
         }
     }
-
-    let heading = d3.select('body')
-        .append('h2')
-        .text('Rapes Reported in India')
 
     let svg = d3.select('body')
         .append('svg')
@@ -42,9 +48,31 @@ let { features: states } = india
         .attr('stroke', 'white')
         .attr('stroke-width', '0.2')
 
-    let div = d3.select('body')
-        .append('div')
-        .attr('id', 'tooltip')
+    let legend = d3.select('svg')
+        .append('g')
+        .attr('class', 'legend')
+        .attr('transform', 'translate(500, 100)')
+        .selectAll('g')
+        .data(colorDomain)
+        .enter()
+
+    let legendColor = legend
+        .append('rect')
+        .attr('fill', d => color(d))
+        .attr('x', (d, i) => i * 20)
+        .attr('width', 20)
+        .attr('height', 10)
+
+    let legendText = legend
+        .append('text')
+        .attr('class', 'legend-text')
+        .attr('x', (d, i) => i * 20)
+        .attr('dy', '2.2em')
+        .text((d, i) => i == 0 || i == 9 ? d : null)
+
+    let tooltip = d3.select('body')
+        .append('tooltip')
+        .attr('class', 'tooltip')
         .style('opacity', '0')
 
     let map = svg
@@ -52,13 +80,13 @@ let { features: states } = india
         .data(states)
         .enter()
         .append('path')
-        .attr('fill', color)
+        .attr('fill', d => color(d.properties.CASES))
         .attr('d', path)
         .on('mouseover', d => {
-            div.transition()
+            tooltip.transition()
                 .duration(200)
                 .style('opacity', 0.9)
-            div
+            tooltip
                 .html('<strong>' +
                         d.properties.NAME_1 +
                     '</strong>' +
@@ -66,13 +94,50 @@ let { features: states } = india
                         d.properties.CASES)
         })
         .on('mousemove', function(d){
-                div
-                .style('left', (d3.mouse(this)[0] - 10) + 'px')
-                .style('top', (d3.mouse(this)[1] - 10) + 'px')
+                tooltip
+                .style('left', (d3.mouse(this)[0]) + 'px')
+                .style('top', (d3.mouse(this)[1]) + 'px')
         })
         .on('mouseout', d => {
-            div.transition()
+            tooltip.transition()
                 .duration(500)
                 .style('opacity', 0)
           })
+        .on('click', clicked)
+
+    function clicked(d) {
+        if (active.node() === this) return reset()
+        active = d3.select(this).classed('active', true)
+        let bounds = path.bounds(d)
+            dx = bounds[1][0] - bounds[0][0],
+            dy = bounds[1][1] - bounds[0][1],
+            x = (bounds[0][0] + bounds[1][0]) / 2,
+            y = (bounds[0][1] + bounds[1][1]) / 2,
+            scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+            translate = [width / 2 - scale * x, height / 2 - scale * y]
+
+        svg.transition()
+        .delay(500)
+        .duration(1000)
+        .call(zoom.transform, transform(translate, scale))
+    }
+
+    function transform(coords, scale){
+        return d3.zoomIdentity
+            .translate(coords[0],coords[1])
+            .scale(scale)
+    }
+
+    function zoomed() {
+        svg.attr('transform', d3.event.transform)
+    }
+
+    function reset() {
+      active.classed("active", false);
+      active = d3.select(null);
+
+      svg.transition()
+          .duration(750)
+          .call( zoom.transform, d3.zoomIdentity.translate(margin.left, margin.top) )
+    }
 })
