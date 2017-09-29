@@ -13,13 +13,13 @@ let color =  d3.scaleLinear()
                 .range(d3.schemeYlOrRd[9])
 
 let active = d3.select(null)
-
 let { features: states } = india
 
 let heading = d3.select('body')
     .append('h2')
     .text('Rapes Reported in India 2015')
 
+//get csv data and basically do everything
  d3.csv('india_crime.csv', (err, file) => {
     if (err) throw err
     let totalChildCases = d3.sum(file, d => parseFloat(d.cases_under_12))
@@ -28,6 +28,9 @@ let heading = d3.select('body')
                 .scaleExtent([1, 8])
                 .on('zoom', zoomed)
 
+    function zoomed(){ svg.attr('transform', d3.event.transform) }
+
+    //get the cases from the csv file and make it a property of the state
     for(i=0; i< states.length; i++){
         for(j=0; j< file.length; j++){
             if (states[i].properties.ID_1 === +file[j].id) {
@@ -38,6 +41,7 @@ let heading = d3.select('body')
         }
     }
 
+    //draw map
     let svg = d3.select('body')
         .append('svg')
         .attr('class', 'svg')
@@ -50,6 +54,7 @@ let heading = d3.select('body')
         .attr('stroke', 'white')
         .attr('stroke-width', '0.2')
 
+    //draw legend
     let legend = d3.select('svg')
         .append('g')
         .attr('class', 'legend')
@@ -58,6 +63,7 @@ let heading = d3.select('body')
         .data(colorDomain)
         .enter()
 
+    //fill legend
     let legendColor = legend
         .append('rect')
         .attr('fill', d => color(d))
@@ -65,6 +71,7 @@ let heading = d3.select('body')
         .attr('width', 20)
         .attr('height', 10)
 
+    //map legend keys
     let legendText = legend
         .append('text')
         .attr('class', 'legend-text')
@@ -72,11 +79,13 @@ let heading = d3.select('body')
         .attr('dy', '2.2em')
         .text((d, i) => i == 0 || i == 9 ? d : null)
 
+    //tooltip displaying info
     let tooltip = d3.select('body')
         .append('tooltip')
         .attr('class', 'tooltip')
         .style('opacity', '0')
 
+    //fill map and set events
     let map = svg
         .selectAll('path')
         .data(states)
@@ -89,11 +98,8 @@ let heading = d3.select('body')
                 .duration(200)
                 .style('opacity', 0.9)
             tooltip
-                .html('<strong>' +
-                        d.properties.NAME_1 +
-                    '</strong>' +
-                    '<br />' +
-                        d.properties.CASES)
+                .html('<strong>' + d.properties.NAME_1 +'</strong>' +
+                        '<br />' + d.properties.CASES)
         })
         .on('mousemove', function(d){
                 tooltip
@@ -107,6 +113,7 @@ let heading = d3.select('body')
           })
         .on('click', clicked)
 
+    //calculate the bounds for the zoom, change tooltip data & zoom.
     function clicked(d) {
         if (active.node() === this) return reset()
         active = d3.select(this).classed('active', true)
@@ -140,22 +147,18 @@ let heading = d3.select('body')
         .call(zoom.transform, transform(translate, scale))
     }
 
-    function transform(coords, scale){
-        return d3.zoomIdentity
+    //convenience
+    const transform = (coords, scale) =>
+        d3.zoomIdentity
             .translate(coords[0],coords[1])
             .scale(scale)
-    }
 
-    function zoomed() {
-        svg.attr('transform', d3.event.transform)
-    }
-
-    function reset() {
-      active.classed("active", false);
-      active = d3.select(null);
-
-      svg.transition()
-          .duration(750)
-          .call( zoom.transform, d3.zoomIdentity.translate(margin.left, margin.top) )
+    //un-zoom
+    const  reset = () => {
+        active.classed("active", false);
+        active = d3.select(null);
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, transform([margin.left, margin.top], 1))
     }
 })
