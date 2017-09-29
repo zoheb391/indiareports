@@ -22,6 +22,7 @@ let heading = d3.select('body')
 
  d3.csv('india_crime.csv', (err, file) => {
     if (err) throw err
+    let totalChildCases = d3.sum(file, d => parseFloat(d.cases_under_12))
 
     let zoom = d3.zoom()
                 .scaleExtent([1, 8])
@@ -31,6 +32,7 @@ let heading = d3.select('body')
         for(j=0; j< file.length; j++){
             if (states[i].properties.ID_1 === +file[j].id) {
                 states[i].properties.CASES = file[j].cases
+                states[i].properties.CASES_UNDER_12 = file[j].cases_under_12
                 break;
             }
         }
@@ -114,7 +116,23 @@ let heading = d3.select('body')
             x = (bounds[0][0] + bounds[1][0]) / 2,
             y = (bounds[0][1] + bounds[1][1]) / 2,
             scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
-            translate = [width / 2 - scale * x, height / 2 - scale * y]
+            translate = [width / 2 - scale * x, height / 2 - scale * y],
+            percentageCalc = Math.floor((d.properties.CASES_UNDER_12/totalChildCases) * 100)
+
+        tooltip.html('<div>' +
+                        '<strong>' +
+                          d.properties.NAME_1 +
+                        '</strong>' +
+                     ' </div>' + '<br />' +
+                      '<div class="tooltip-data">' +
+                        '<b>' + 'Total Cases: ' + '</b>' + d.properties.CASES + '<br />' +
+                        '<b>' + 'Child Victims: ' + '</b>' + d.properties.CASES_UNDER_12 + '<br />' +
+                        '<b>' + 'All India % of Child Victims: ' + '</b>' +
+                            percentageCalc +
+                        '<br />' +
+                      '</div>' +
+                    '</div>'
+                    )
 
         svg.transition()
         .delay(500)

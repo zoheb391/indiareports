@@ -1,37 +1,37 @@
-id,states,cases
-1,A & N Islands,36
-2,Andhra Pradesh,1029
-3,Arunachal Pradesh,71
-4,Assam,1733
-5,Bihar,1041
-6,Chandigarh,72
-7,Chhattisgarh,1561
-8,Dadra and Nagar Haveli,8
-9,Daman & Diu,5
-10,Delhi ,2210
-11,Goa,88
-12,Gujarat,503
-13,Haryana,1070
-14,Himachal Pradesh,250
-15,Jammu & Kashmir,296
-16,Jharkhand,1059
-17,Karnataka,589
-18,Kerala,1268
-19,Lakshadweep,0
-20,Madhya Pradesh,4400
-21,Maharashtra,4189
-22,Manipur,46
-23,Meghalaya,94
-24,Mizoram,74
-25,Nagaland,35
-26,Odisha,2251
-27,Puducherry,3
-28,Punjab,886
-29,Rajasthan,3649
-30,Sikkim,5
-31,Tamil Nadu,421
-36,Telangana,1105
-32,Tripura,213
-33,Uttar Pradesh,3029
-34,Uttarakhand,283
-35,West Bengal,1199
+id,states,cases,cases_under_12,percentage_under_12
+1,A & N Islands,36,3,8
+2,Andhra Pradesh,1029,91,9
+3,Arunachal Pradesh,71,10,14
+4,Assam,1733,8,0
+5,Bihar,1041,6,1
+6,Chandigarh,72,11,15
+7,Chhattisgarh,1561,66,4
+8,Dadra and Nagar Haveli,8,0,0
+9,Daman & Diu,5,0,0
+10,Delhi ,2210,227,10
+11,Goa,88,11,13
+12,Gujarat,503,3,1
+13,Haryana,1070,47,4
+14,Himachal Pradesh,250,31,12
+15,Jammu & Kashmir,296,8,3
+16,Jharkhand,1059,1,0
+17,Karnataka,589,0,0
+18,Kerala,1268,123,10
+19,Lakshadweep,0,0,0
+20,Madhya Pradesh,4400,169,4
+21,Maharashtra,4189,372,9
+22,Manipur,46,5,11
+23,Meghalaya,94,12,13
+24,Mizoram,74,19,26
+25,Nagaland,35,4,11
+26,Odisha,2251,34,2
+27,Puducherry,3,0,0
+28,Punjab,886,48,5
+29,Rajasthan,3649,61,2
+30,Sikkim,5,0,0
+31,Tamil Nadu,421,0,0
+36,Telangana,1105,94,9
+32,Tripura,213,32,15
+33,Uttar Pradesh,3029,97,3
+34,Uttarakhand,283,9,3
+35,West Bengal,1199,0,0
